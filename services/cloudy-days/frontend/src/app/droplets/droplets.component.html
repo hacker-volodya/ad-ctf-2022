@@ -1,0 +1,8 @@
+<h2>Deployed Droplets</h2>
+
+<mat-list>
+  <mat-list-item *ngFor="let droplet of droplets">
+    <mat-icon matListIcon>favorite</mat-icon>
+    <a matLine routerLink="/droplets/{{droplet.name}}">{{droplet.name}}</a>
+  </mat-list-item>
+</mat-list>

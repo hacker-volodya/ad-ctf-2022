@@ -1,0 +1,11 @@
+.spacer {
+  flex: 1 1 auto;
+}
+
+.menu-button {
+  margin-left: 15px;
+}
+
+.main {
+  margin: 20px;
+}

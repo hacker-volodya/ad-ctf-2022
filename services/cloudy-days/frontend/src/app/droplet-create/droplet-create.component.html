@@ -1,0 +1,7 @@
+<div>
+  <form class="upload-droplet">
+    Name: <input name="name" type="text" [(ngModel)]="name"/>
+    Jar file: <input name="file" type="file" (change)="onFileSelected($event)">
+    <button type="button" (click)="onUpload()">Upload</button>
+  </form>
+</div>

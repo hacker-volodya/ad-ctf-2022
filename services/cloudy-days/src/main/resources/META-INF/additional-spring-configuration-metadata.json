@@ -1,0 +1,14 @@
+{
+  "properties": [
+    {
+      "name": "cloudy.base-jar-directory",
+      "type": "java.lang.String",
+      "description": "Directory with uploaded jars."
+    },
+    {
+      "name": "cloudy.base-storage-directory",
+      "type": "java.lang.String",
+      "description": "Directory with data for jars."
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+<div *ngIf="droplet">
+  <h2>{{droplet.name}}</h2>
+  <div>Created: {{droplet.created}}</div>
+  <div>
+    Logs:
+    <ul class="logs">
+      <li *ngFor="let log of droplet.logs">{{ log }}</li>
+    </ul>
+  </div>
+
+  <form class="execute-droplet">
+    <div>Execute droplet</div>
+    <div>
+      <button type="button" (click)="onAddArgument(); onChange()">+</button>
+      <button type="button" *ngIf="args.length > 0" (click)="onRemoveArgument(); onChange()">-</button>
+    </div>
+    <div *ngFor="let x of args; let i = index; trackBy: trackByFn">
+      <input name="argument{{ i }}" type="text" placeholder="Argument #{{ i }}" [(ngModel)]="args[i]"
+             (keydown)="onChange()" class="argument"/>
+    </div>
+    <div>
+      <button type="button" (click)="onChange(); onExecute()">Execute</button>
+    </div>
+    <div *ngIf="result">
+      Result: {{ result }}
+    </div>
+  </form>
+</div>
+<div *ngIf="!droplet">Loading...</div>
