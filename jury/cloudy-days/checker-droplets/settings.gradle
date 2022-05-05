@@ -1,0 +1,4 @@
+include 'cloudy-api'
+include 'check1'
+include 'flagstore1'
+include 'flagstore2'
