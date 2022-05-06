@@ -1,0 +1,8 @@
+include 'cloudy-api'
+include 'sploits:cloudy-days:sploit-droplets:exploit1'
+include 'sploits:cloudy-days:sploit-droplets:exploit2'
+include 'sploits:cloudy-days:sploit-droplets:exploit3'
+include 'checkers:cloudy-days:checker-droplets:check1'
+include 'checkers:cloudy-days:checker-droplets:flagstore1'
+include 'checkers:cloudy-days:checker-droplets:flagstore2'
+include 'services:cloudy-days:backend'

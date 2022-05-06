@@ -2,12 +2,13 @@ import {Injectable} from '@angular/core';
 import {catchError, map, Observable, of} from "rxjs";
 import {Droplet} from "./droplet";
 import {HttpClient} from "@angular/common/http";
+import {environment} from "../environments/environment";
 
 @Injectable({
   providedIn: 'root'
 })
 export class DropletService {
-  private dropletsUrl = 'http://127.0.0.1:8080/droplets';  // URL to web api
+  private dropletsUrl = environment.baseUrl;  // URL to web api
 
   constructor(private http: HttpClient) {
   }
@@ -37,7 +38,7 @@ export class DropletService {
     for (let i = 0; i < args.length; i++) {
       form.append("arguments", args[i]);
     }
-    return this.http.post<string>(this.dropletsUrl + "/" + droplet.name, form)
+    return this.http.post(this.dropletsUrl + "/" + droplet.name, form, {responseType: 'text'})
       .pipe(
         catchError(this.handleError<string>('execute', "-error-"))
       );

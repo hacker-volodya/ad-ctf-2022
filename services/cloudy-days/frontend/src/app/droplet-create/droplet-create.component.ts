@@ -1,5 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {DropletService} from "../droplet.service";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-droplet-create',
@@ -10,7 +11,10 @@ export class DropletCreateComponent implements OnInit {
   name?: string;
   file?: File;
 
-  constructor(private dropletService: DropletService) {
+  constructor(
+    private dropletService: DropletService,
+    private router: Router,
+  ) {
   }
 
   ngOnInit(): void {
@@ -19,6 +23,7 @@ export class DropletCreateComponent implements OnInit {
   onUpload(): void {
     if (this.name && this.file) {
       this.dropletService.upload(this.name, this.file).subscribe(droplet => {
+        this.router.navigate(['/droplets/' + droplet.name]);
       });
     }
   }

@@ -1,0 +1,15 @@
+.execute-droplet, .logs {
+  margin-top: 20px;
+}
+
+.arg-buttons {
+  margin-bottom: 20px;
+}
+
+.result-card {
+  margin-top: 20px;
+}
+
+.log-entry {
+  height: auto !important;
+}

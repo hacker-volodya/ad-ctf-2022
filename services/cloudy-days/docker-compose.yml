@@ -1,0 +1,15 @@
+version: '2'
+services:
+  backend:
+    build: backend
+    volumes:
+      - ./db:/app/db
+      - ./data:/app/data
+      - ./jars:/app/jars
+    pids_limit: 100
+    restart: always
+  frontend:
+    build: frontend
+    ports:
+      - "2:80"
+    restart: always

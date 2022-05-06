@@ -1,0 +1,8 @@
+tasks.register("buildAll") {
+    dependsOn 'sploits:cloudy-days:sploit-droplets:exploit1:jar'
+    dependsOn 'sploits:cloudy-days:sploit-droplets:exploit2:jar'
+    dependsOn 'sploits:cloudy-days:sploit-droplets:exploit3:jar'
+    dependsOn 'checkers:cloudy-days:checker-droplets:check1:jar'
+    dependsOn 'checkers:cloudy-days:checker-droplets:flagstore1:jar'
+    dependsOn 'checkers:cloudy-days:checker-droplets:flagstore2:jar'
+}

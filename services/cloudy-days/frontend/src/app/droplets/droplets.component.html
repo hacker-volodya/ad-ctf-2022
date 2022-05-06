@@ -2,7 +2,7 @@
 
 <mat-list>
   <mat-list-item *ngFor="let droplet of droplets">
-    <mat-icon matListIcon>favorite</mat-icon>
+    <mat-icon matListIcon>chevron_right</mat-icon>
     <a matLine routerLink="/droplets/{{droplet.name}}">{{droplet.name}}</a>
   </mat-list-item>
 </mat-list>

@@ -1,29 +1,42 @@
 <div *ngIf="droplet">
-  <h2>{{droplet.name}}</h2>
+  <h1>{{droplet.name}}</h1>
   <div>Created: {{droplet.created}}</div>
-  <div>
-    Logs:
-    <ul class="logs">
-      <li *ngFor="let log of droplet.logs">{{ log }}</li>
-    </ul>
+  <div class="logs">
+    <h2>Logs</h2>
+    <mat-list>
+      <mat-list-item *ngFor="let log of droplet.logs" class="log-entry">
+        <mat-icon matListIcon>chevron_right</mat-icon>
+        <span matLine><pre>{{ log }}</pre></span>
+      </mat-list-item>
+    </mat-list>
   </div>
 
   <form class="execute-droplet">
-    <div>Execute droplet</div>
-    <div>
-      <button type="button" (click)="onAddArgument(); onChange()">+</button>
-      <button type="button" *ngIf="args.length > 0" (click)="onRemoveArgument(); onChange()">-</button>
+    <h2>Execute droplet</h2>
+    <div class="arg-buttons">
+      <button mat-mini-fab color="basic" (click)="onAddArgument(); onChange()">+</button>
+      <button mat-mini-fab color="basic" *ngIf="args.length > 0" (click)="onRemoveArgument(); onChange()">-</button>
     </div>
     <div *ngFor="let x of args; let i = index; trackBy: trackByFn">
-      <input name="argument{{ i }}" type="text" placeholder="Argument #{{ i }}" [(ngModel)]="args[i]"
-             (keydown)="onChange()" class="argument"/>
+      <mat-form-field class="example-form-field" appearance="fill">
+        <mat-label>Argument #{{ i }}</mat-label>
+        <input matInput name="argument{{ i }}" type="text" [(ngModel)]="args[i]"
+               (keydown)="onChange()" class="argument"/>
+      </mat-form-field>
     </div>
     <div>
-      <button type="button" (click)="onChange(); onExecute()">Execute</button>
+      <button mat-raised-button color="primary" (click)="onChange(); onExecute()">Execute</button>
     </div>
-    <div *ngIf="result">
-      Result: {{ result }}
-    </div>
+    <mat-card *ngIf="result" class="result-card">
+      <mat-card-header>
+        <mat-card-title>Result</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <pre>
+          {{ result }}
+        </pre>
+      </mat-card-content>
+    </mat-card>
   </form>
 </div>
 <div *ngIf="!droplet">Loading...</div>

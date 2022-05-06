@@ -1,7 +1,17 @@
 <div>
   <form class="upload-droplet">
-    Name: <input name="name" type="text" [(ngModel)]="name"/>
-    Jar file: <input name="file" type="file" (change)="onFileSelected($event)">
-    <button type="button" (click)="onUpload()">Upload</button>
+    <div>
+      <mat-form-field appearance="fill">
+        <mat-label>Name</mat-label>
+        <input matInput name="name" type="text" [(ngModel)]="name"/>
+      </mat-form-field>
+    </div>
+    <div style="margin-bottom: 20px;">
+      <button type="button" mat-raised-button (click)="fileInput.click()">Choose Jar File</button>
+      <input hidden (change)="onFileSelected($event)" #fileInput type="file" name="file">
+    </div>
+    <div>
+      <button mat-raised-button color="primary" (click)="onUpload()">Upload</button>
+    </div>
   </form>
 </div>
