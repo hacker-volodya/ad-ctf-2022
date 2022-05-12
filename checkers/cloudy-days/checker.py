@@ -281,6 +281,7 @@ def _main():
             info()
         else:
             raise WrongArgumentsError()
+        die(ExitStatus.OK, "OK")
     except CorruptError as e:
         die(ExitStatus.CORRUPT, traceback.format_exc())
     except MumbleError as e:
