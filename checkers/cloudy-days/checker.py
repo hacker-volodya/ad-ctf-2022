@@ -53,6 +53,8 @@ def get(host: str, flag_id: str, flag: str, vuln: str):
     random.seed(int.from_bytes(flag_id.encode(), 'big'))
     name = rand_string()
     key = rand_string()
+    if vuln + "_" + name not in api.list():
+        raise CorruptError("No such droplet")
     droplet = Flagstore(vuln + "_" + name, api, vuln)
     droplet.assert_get(key, flag)
 
