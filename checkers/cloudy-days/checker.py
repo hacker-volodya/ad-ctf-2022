@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import inspect
 import os
 import random
@@ -6,6 +7,7 @@ from enum import Enum
 from sys import argv
 import sys
 from typing import List
+import traceback
 
 from fakesession import FakeSession
 
@@ -14,7 +16,7 @@ from fakesession import FakeSession
 """
 
 # SERVICE INFO
-PORT = 8080
+PORT = 2
 
 # DEBUG -- logs to stderr, TRACE -- log HTTP requests
 DEBUG = os.getenv("DEBUG", True)
@@ -67,15 +69,24 @@ class CloudyApi:
     # list droplets, returns list of names
     def list(self):
         r = self.s.get("/droplets")
-        assert r.status_code == 200, f"Bad response: {r.text}"
-        return r.json()
+        if r.status_code != 200:
+            raise MumbleError(f"Bad response: {r.text}")
+        x = r.json()
+        if not isinstance(x, list):
+            raise MumbleError("List is not array")
+        if any([not isinstance(s, str) for s in x]):
+            raise MumbleError("List is not of strings")
+        return x
 
     # get droplet logs
     # {"name": "<name>", "created": "<date>", "logs": ["log1", "log2"]}
     def get(self, name: str):
         r = self.s.get(f"/droplets/{name}")
-        assert r.status_code == 200, f"Bad response: {r.text}"
-        return r.json()
+        if r.status_code != 200:
+            raise MumbleError(f"Bad response: {r.text}")
+        x = r.json()
+        Droplet.check_structure(x)
+        return x
 
     # upload new droplet
     # jar names: check1, flagstore1
@@ -85,14 +96,18 @@ class CloudyApi:
         r = self.s.put(f"/droplets/{name}", files={
             'file': open(f'{base}/checker-droplets/{jar_name}/build/libs/{jar_name}-0.0.1-SNAPSHOT.jar', 'rb')
         })
-        assert r.status_code == 200, f"Bad response: {r.text}"
-        return r.json()
+        if r.status_code != 200:
+            raise MumbleError(f"Bad response: {r.text}")
+        x = r.json()
+        Droplet.check_structure(x)
+        return x
 
     # execute
     # returns string from droplet
     def execute(self, name: str, arguments: List[str]):
         r = self.s.post(f"/droplets/{name}", data={"arguments": arguments})
-        assert r.status_code == 200, f"Bad response: {r.text}"
+        if r.status_code != 200:
+            raise MumbleError(f"Bad response: {r.text}")
         return r.text
 
 
@@ -103,24 +118,41 @@ class Droplet:
         self.jar_name = jar_name
 
     def is_deployed(self):
-        return self.name in self.api.list() and self.api.get(self.name).get("name") == self.name
+        return self.name in self.api.list() and self.api.get(self.name)["name"] == self.name
 
     def deploy(self):
         if self.is_deployed():
             return
         droplet = self.api.upload(self.name, self.jar_name)
-        assert droplet.get("name") == self.name, "Deploy error"
-        assert self.is_deployed(), "Deploy error"
+        if droplet["name"] != self.name:
+            raise MumbleError("Deploy error")
+        if not self.is_deployed():
+            raise MumbleError("Deploy error")
 
     def logs(self):
-        assert self.is_deployed(), "Fetching logs, but droplet not deployed"
-        droplet = self.api.get(self.name)
-        assert droplet.get("logs") is not None, "Log fetching error"
-        return droplet["logs"]
+        if not self.is_deployed():
+            raise MumbleError("Fetching logs, but droplet not deployed")
+        return self.api.get(self.name)["logs"]
 
     def execute(self, arguments: List[str]):
-        assert self.is_deployed(), "Executing, but droplet not deployed"
+        if not self.is_deployed():
+            raise MumbleError("Executing, but droplet not deployed")
         return self.api.execute(self.name, arguments)
+
+    @classmethod
+    def check_structure(cls, droplet):
+        if not isinstance(droplet, dict):
+            raise MumbleError("Droplet is not an object")
+        if list(droplet.keys()) != ["name", "created", "logs"]:
+            raise MumbleError("Wrong droplet structure")
+        if not isinstance(droplet["name"], str):
+            raise MumbleError("Field 'name' is not str")
+        if not isinstance(droplet["created"], str):
+            raise MumbleError("Field 'created' is not str")
+        if not isinstance(droplet["logs"], list):
+            raise MumbleError("Field 'logs' is not list")
+        if any([not isinstance(s, str) for s in droplet["logs"]]):
+            raise MumbleError("Logs are not of strings")
 
 
 class Check1(Droplet):
@@ -135,11 +167,11 @@ class Check1(Droplet):
         expected_logs = [last_data]
         for i in range(7):
             new_data = rand_string()
-            assert self.save(new_data) in expected_logs, f"Iteration {i} failed"
+            if self.save(new_data) not in expected_logs:
+                raise MumbleError(f"Iteration {i} failed")
             expected_logs.append(new_data)
-        print(expected_logs)
-        print(self.logs())
-        assert set(expected_logs[:-2]) <= set(self.logs()), "Logs not found"
+        if not set(expected_logs[:-2]) <= set(self.logs()):
+            raise MumbleError("Logs not found")
 
 
 class Flagstore(Droplet):
@@ -153,14 +185,16 @@ class Flagstore(Droplet):
         return self.execute(["get", key])
 
     def assert_get(self, key, expected_flag):
-        assert self.get(key) == str(java_string_hashcode(expected_flag)), "Flag mismatch"
+        if self.get(key) != str(java_string_hashcode(expected_flag)):
+            raise CorruptError("Flag mismatch")
 
     def do_check(self):
         key = rand_string()
         flag = rand_string()
         self.put(key, flag)
         self.assert_get(key, flag)
-        assert "ok" in self.logs()
+        if "ok" not in self.logs():
+            raise MumbleError("Check failed")
 
 
 """
@@ -194,6 +228,31 @@ class ExitStatus(Enum):
     CHECKER_ERROR = 110
 
 
+class CheckerError(RuntimeError):
+    def __init__(self, *args: object):
+        super().__init__(*args)
+
+
+class CorruptError(CheckerError):
+    def __init__(self, *args: object):
+        super().__init__(*args)
+
+
+class MumbleError(CheckerError):
+    def __init__(self, *args: object):
+        super().__init__(*args)
+
+
+class DownError(CheckerError):
+    def __init__(self, *args: object):
+        super().__init__(*args)
+
+
+class WrongArgumentsError(CheckerError):
+    def __init__(self, *args: object):
+        super().__init__(*args)
+
+
 def die(code: ExitStatus, msg: str):
     if msg:
         print(msg, file=sys.stderr)
@@ -202,12 +261,18 @@ def die(code: ExitStatus, msg: str):
 
 def _main():
     try:
+        if len(argv) < 3:
+            raise WrongArgumentsError()
         cmd = argv[1]
         hostname = argv[2]
         if cmd == "get":
+            if len(argv) < 6:
+                raise WrongArgumentsError()
             fid, flag, vuln = argv[3], argv[4], argv[5]
             get(hostname, fid, flag, vuln)
         elif cmd == "put":
+            if len(argv) < 6:
+                raise WrongArgumentsError()
             fid, flag, vuln = argv[3], argv[4], argv[5]
             put(hostname, fid, flag, vuln)
         elif cmd == "check":
@@ -215,12 +280,20 @@ def _main():
         elif cmd == "info":
             info()
         else:
-            raise IndexError
-    except IndexError:
+            raise WrongArgumentsError()
+    except CorruptError as e:
+        die(ExitStatus.CORRUPT, traceback.format_exc())
+    except MumbleError as e:
+        die(ExitStatus.MUMBLE, traceback.format_exc())
+    except DownError | IOError as e:
+        die(ExitStatus.DOWN, traceback.format_exc())
+    except WrongArgumentsError as e:
         die(
             ExitStatus.CHECKER_ERROR,
             f"Usage: {argv[0]} check|put|get IP FLAGID FLAG",
         )
+    except Exception as e:
+        die(ExitStatus.CHECKER_ERROR, traceback.format_exc())
 
 
 if __name__ == "__main__":
