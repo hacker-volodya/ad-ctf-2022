@@ -285,7 +285,7 @@ def _main():
         die(ExitStatus.CORRUPT, traceback.format_exc())
     except MumbleError as e:
         die(ExitStatus.MUMBLE, traceback.format_exc())
-    except DownError | IOError as e:
+    except (DownError, IOError) as e:
         die(ExitStatus.DOWN, traceback.format_exc())
     except WrongArgumentsError as e:
         die(
