@@ -58,7 +58,7 @@ def put(host: str, flag_id: str, flag: str, vuln: str):
     token = api.create(name)
     report = Report(str(datetime.datetime.now()), loc, flag)
     report.put_in(api, name)
-    die(ExitStatus.OK, f"{flag_id};{token}")
+    print(f"{flag_id};{token}", end="")
 
 
 def get(host: str, flag_id: str, flag: str, vuln: str):
