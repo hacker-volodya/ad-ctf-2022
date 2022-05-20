@@ -4,3 +4,4 @@ jars
 db
 .gradle
 locator-db
+__pycache__
