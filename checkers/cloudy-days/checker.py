@@ -70,7 +70,9 @@ class CloudyApi:
 
     # list droplets, returns list of names
     def list(self):
+        _log("list()")
         r = self.s.get("/droplets")
+        _log(f"-> [{r.status_code}] {r.text}")
         if r.status_code != 200:
             raise MumbleError(f"Bad response: {r.text}")
         x = r.json()
@@ -83,7 +85,9 @@ class CloudyApi:
     # get droplet logs
     # {"name": "<name>", "created": "<date>", "logs": ["log1", "log2"]}
     def get(self, name: str):
+        _log(f"get({name})")
         r = self.s.get(f"/droplets/{name}")
+        _log(f"-> [{r.status_code}] {r.text}")
         if r.status_code != 200:
             raise MumbleError(f"Bad response: {r.text}")
         x = r.json()
@@ -94,10 +98,12 @@ class CloudyApi:
     # jar names: check1, flagstore1
     # returns droplet as in `get`
     def upload(self, name: str, jar_name: str):
+        _log(f"upload({name}, {jar_name})")
         base = os.path.abspath(os.path.dirname(__file__))
         r = self.s.put(f"/droplets/{name}", files={
             'file': open(f'{base}/checker-droplets/{jar_name}/build/libs/{jar_name}-0.0.1-SNAPSHOT.jar', 'rb')
         })
+        _log(f"-> [{r.status_code}] {r.text}")
         if r.status_code != 200:
             raise MumbleError(f"Bad response: {r.text}")
         x = r.json()
@@ -107,7 +113,9 @@ class CloudyApi:
     # execute
     # returns string from droplet
     def execute(self, name: str, arguments: List[str]):
+        _log(f"execute({name}, {arguments})")
         r = self.s.post(f"/droplets/{name}", data={"arguments": arguments})
+        _log(f"-> [{r.status_code}] {r.text}")
         if r.status_code != 200:
             raise MumbleError(f"Bad response: {r.text}")
         return r.text
