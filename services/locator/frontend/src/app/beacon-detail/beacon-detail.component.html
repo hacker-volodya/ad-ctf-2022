@@ -1,0 +1,36 @@
+<h1>Beacon Info</h1>
+
+<div>
+<mat-form-field class="example-form-field" appearance="fill">
+  <mat-label>Enter token to view private data</mat-label>
+  <input matInput name="token" type="text" [(ngModel)]="token">
+</mat-form-field>
+</div>
+<div>
+  <button mat-raised-button color="primary" (click)="getBeacon()">OK</button>
+</div>
+
+<div class="logs">
+  <h2 style="margin: 50px 0 0;">Available reports (public info)</h2>
+  <div *ngIf="publicInfo.length == 0">No such reports</div>
+  <mat-list>
+    <mat-list-item *ngFor="let timestamp of publicInfo" class="log-entry">
+      <mat-icon matListIcon>chevron_right</mat-icon>
+      <span matLine><pre>{{ timestamp }}</pre></span>
+    </mat-list-item>
+  </mat-list>
+</div>
+
+
+<h2>Private reports</h2>
+<div *ngIf="reports.length == 0 && publicInfo.length > 0">Enter token to view reports</div>
+<div *ngIf="reports.length == 0 && publicInfo.length == 0">No reports yet</div>
+<mat-card *ngFor="let report of reports" class="result-card">
+  <mat-card-header>
+    <mat-card-title>{{ report.timestamp }}</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <div>Reported location: {{ report.location }}</div>
+    <div>Additional data: {{ report.comment }}</div>
+  </mat-card-content>
+</mat-card>

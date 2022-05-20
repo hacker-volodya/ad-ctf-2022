@@ -1,0 +1,23 @@
+<h2>Add beacon</h2>
+<div>
+  <mat-form-field class="example-form-field" appearance="fill">
+    <mat-label>Enter Bluetooth MAC address:</mat-label>
+    <input matInput name="id" type="text" [(ngModel)]="id">
+  </mat-form-field>
+</div>
+<div>
+  <button mat-raised-button color="primary" (click)="create()">OK</button>
+</div>
+<div *ngIf="token" style="margin-top: 20px;">
+  Success! Token to access your beacon {{ lastId }}: {{ token }}
+  <a matLine routerLink="/beacons/{{lastId}}">Open beacon</a>
+</div>
+
+<h2 style="margin-top: 50px;">Currently active beacons</h2>
+
+<mat-list>
+  <mat-list-item *ngFor="let i of ids">
+    <mat-icon matListIcon>chevron_right</mat-icon>
+    <a matLine routerLink="/beacons/{{i}}">{{i}}</a>
+  </mat-list-item>
+</mat-list>
