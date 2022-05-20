@@ -19,7 +19,7 @@ from fakesession import FakeSession
 """
 
 # SERVICE INFO
-PORT = 8080
+PORT = 3
 
 # DEBUG -- logs to stderr, TRACE -- log HTTP requests
 DEBUG = os.getenv("DEBUG", True)
