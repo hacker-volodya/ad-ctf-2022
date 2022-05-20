@@ -83,7 +83,7 @@ class LocatorApi:
     # list beacons, returns list of ids
     def list(self):
         _log("list()")
-        r = self.s.get("/beacons")
+        r = self.s.get("/api/beacons")
         _log(f"-> [{r.status_code}] {r.text}")
         if r.status_code != 200:
             raise MumbleError(f"Bad response: {r.text}")
@@ -97,7 +97,7 @@ class LocatorApi:
     # get beacon public info (last timestamp)
     def get_public(self, name: str):
         _log(f"get_public({name})")
-        r = self.s.get(f"/beacons/{name}")
+        r = self.s.get(f"/api/beacons/{name}")
         _log(f"-> [{r.status_code}] {r.text}")
         if r.status_code != 200:
             raise MumbleError(f"Bad response: {r.text}")
@@ -112,7 +112,7 @@ class LocatorApi:
     # returns jwt token to access beacon info
     def create(self, name: str):
         _log(f"create({name})")
-        r = self.s.put(f"/beacons/{name}")
+        r = self.s.put(f"/api/beacons/{name}")
         _log(f"-> [{r.status_code}] {r.text}")
         if r.status_code != 200:
             raise MumbleError(f"Bad response: {r.text}")
@@ -120,7 +120,7 @@ class LocatorApi:
 
     def get_private(self, name: str, token: str):
         _log(f"get_private({name}, {token})")
-        r = self.s.get(f"/beacons/{name}/private", headers={"X-Auth": token})
+        r = self.s.get(f"/api/beacons/{name}/private", headers={"X-Auth": token})
         _log(f"-> [{r.status_code}] {r.text}")
         if r.status_code != 200:
             raise MumbleError(f"Bad response: {r.text}")
@@ -142,7 +142,7 @@ class LocatorApi:
 
     def report(self, name: str, data: bytes):
         _log(f"report({name}, {data})")
-        r = self.s.post(f"/beacons/{name}", data=data)
+        r = self.s.post(f"/api/beacons/{name}", data=data)
         _log(f"-> [{r.status_code}] {r.text}")
         if r.status_code != 200:
             raise MumbleError(f"Bad response: {r.text}")
