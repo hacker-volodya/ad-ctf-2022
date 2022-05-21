@@ -185,11 +185,11 @@ class Report:
     def decode_location(cls, encoded: str):
         locat = encoded.split(" ")
         if len(locat) != 2:
-            raise MumbleError("Wrong location")
+            raise CorruptError("Wrong location")
         try:
             lat, lon = float(locat[0]), float(locat[1])
         except ValueError as e:
-            raise MumbleError("Wrong location")
+            raise CorruptError("Wrong location")
         return Location(lat, lon)
 
     def encode_report(self, location_format: str):
