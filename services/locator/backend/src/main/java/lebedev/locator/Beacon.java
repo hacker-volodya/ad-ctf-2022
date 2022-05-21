@@ -68,7 +68,11 @@ public class Beacon {
                 entry.location = exp.getValue(context, String.class);
                 entry.comment = readString(reader);
                 entries.add(entry);
-            } catch (IOException e) {
+                if (reader.available() == 0) {
+                    return entries;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
                 return entries;
             }
         }
@@ -77,9 +81,12 @@ public class Beacon {
     private static String readString(InputStream reader) throws IOException {
         byte[] lenData = reader.readNBytes(1);
         if (lenData.length == 0) {
-            throw new EOFException();
+            return "";
         }
         int len = lenData[0];
+        if (len < 0) {
+            return "";
+        }
         byte[] data = reader.readNBytes(len);
         return new String(data);
     }
@@ -87,7 +94,7 @@ public class Beacon {
     private static float readFloat(InputStream reader) throws IOException {
         byte[] data = reader.readNBytes(4);
         if (data.length < 4) {
-            throw new EOFException();
+            return 0;
         }
         return ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN).getFloat();
     }
