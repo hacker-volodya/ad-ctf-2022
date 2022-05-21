@@ -27,7 +27,7 @@ DEBUG = os.getenv("DEBUG", True)
 
 
 def info():
-    print('{"vulns": 2, "timeout": 30, "attack_data": ""}', flush=True, end="")
+    print('vulns: 2:1:2\npublic_flag_description: droplet storage\n', flush=True, end="")
     exit(101)
 
 
@@ -43,6 +43,7 @@ def put(host: str, flag_id: str, flag: str, vuln: str):
     random.seed(int.from_bytes(flag_id.encode(), 'big'))
     name = rand_string()
     key = rand_string()
+    vuln = random.choice(["2", "1", "2"])
     droplet = Flagstore(vuln + "_" + name, api, vuln)
     droplet.deploy()
     droplet.put(key, flag)
@@ -53,6 +54,7 @@ def get(host: str, flag_id: str, flag: str, vuln: str):
     random.seed(int.from_bytes(flag_id.encode(), 'big'))
     name = rand_string()
     key = rand_string()
+    vuln = random.choice(["2", "1", "2"])
     if vuln + "_" + name not in api.list():
         raise CorruptError("No such droplet")
     droplet = Flagstore(vuln + "_" + name, api, vuln)
