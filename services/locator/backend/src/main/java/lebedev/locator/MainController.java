@@ -61,7 +61,7 @@ public class MainController {
         String[] parts = token.split("\\.");
         String payload = new String(decoder.decode(parts[1]));
         payload = payload.subSequence(1, payload.length() - 1).toString();
-        payload = payload.replace("\\r", "").replace("\\n", "").replace("\\", "");
+        payload = payload.replace("\\r", "").replace("\\n", "").replace("\\\"", "\"");
         JWT jwt = Mapper.deserialize(payload.getBytes(StandardCharsets.UTF_8), JWT.class);
         HMACVerifier verifier = HMACVerifier.newVerifier(jwtSecret);
         verifier.verify(Algorithm.HS256, (parts[0] + "." + parts[1]).getBytes(StandardCharsets.UTF_8), decoder.decode(parts[2]));
