@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
@@ -73,13 +74,15 @@ public class MainController {
     }
 
     @PostMapping("/beacons/{id}")
-    String reportBeaconLocation(@RequestBody() byte[] data, @PathVariable String id) {
-        if (data.length > 256) {
+    Beacon.BeaconEntry reportBeaconLocation(@RequestBody() byte[] data, @PathVariable String id) throws IOException {
+        if (data.length > 127) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Too many data!");
         }
         Beacon beacon = beaconRepository.findById(id).orElseThrow();
         beacon.appendData(data);
+        Beacon.BeaconEntry addedEntry = Beacon.parseEntry(beacon.getDataReader());
+        beacon.appendData(new byte[] { (byte)data.length });
         beaconRepository.save(beacon);
-        return "ok";
+        return addedEntry;
     }
 }

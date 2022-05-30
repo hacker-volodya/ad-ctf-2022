@@ -51,23 +51,45 @@ public class Beacon {
         System.arraycopy(oldData, 0, this.data, data.length, oldData.length);
     }
 
+    public InputStream getDataReader() {
+        return new ByteArrayInputStream(this.data);
+    }
+
+    public static BeaconEntry parseEntry(InputStream reader) throws IOException {
+        BeaconEntry entry = new BeaconEntry();
+        entry.timestamp = readString(reader);
+        Location loc = new Location();
+        loc.lat = readFloat(reader);
+        loc.lon = readFloat(reader);
+        String locationFormat = readString(reader);
+        try {
+            ExpressionParser parser = new SpelExpressionParser();
+            Expression exp = parser.parseExpression(locationFormat, new TemplateParserContext());
+            StandardEvaluationContext context = new StandardEvaluationContext(loc);
+            entry.location = exp.getValue(context, String.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            entry.location = "<error>";
+        }
+        entry.comment = readString(reader);
+        return entry;
+    }
+
     public List<BeaconEntry> parseEntries() {
-        ByteArrayInputStream reader = new ByteArrayInputStream(this.data);
+        InputStream reader = this.getDataReader();
         List<BeaconEntry> entries = new ArrayList<>();
         while (true) {
             try {
-                BeaconEntry entry = new BeaconEntry();
-                entry.timestamp = readString(reader);
-                Location loc = new Location();
-                loc.lat = readFloat(reader);
-                loc.lon = readFloat(reader);
-                String locationFormat = readString(reader);
-                ExpressionParser parser = new SpelExpressionParser();
-                Expression exp = parser.parseExpression(locationFormat, new TemplateParserContext());
-                StandardEvaluationContext context = new StandardEvaluationContext(loc);
-                entry.location = exp.getValue(context, String.class);
-                entry.comment = readString(reader);
-                entries.add(entry);
+                byte[] len = reader.readNBytes(1);
+                if (len.length < 1) {
+                    return entries;
+                }
+                int length = len[0];
+                byte[] entry = reader.readNBytes(length);
+                if (entry.length < length) {
+                    return entries;
+                }
+                entries.add(parseEntry(new ByteArrayInputStream(entry)));
                 if (reader.available() == 0) {
                     return entries;
                 }
@@ -79,16 +101,20 @@ public class Beacon {
     }
 
     private static String readString(InputStream reader) throws IOException {
-        byte[] lenData = reader.readNBytes(1);
-        if (lenData.length == 0) {
-            return "";
-        }
-        int len = lenData[0];
+        int len = readInt(reader);
         if (len < 0) {
             return "";
         }
         byte[] data = reader.readNBytes(len);
         return new String(data);
+    }
+
+    private static int readInt(InputStream reader) throws IOException {
+        byte[] data = reader.readNBytes(4);
+        if (data.length < 4) {
+            return 0;
+        }
+        return ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN).getInt();
     }
 
     private static float readFloat(InputStream reader) throws IOException {

@@ -146,8 +146,7 @@ class LocatorApi:
         _log(f"-> [{r.status_code}] {r.text}")
         if r.status_code != 200:
             raise MumbleError(f"Bad response: {r.text}")
-        if r.text != "ok":
-            raise MumbleError("Report is not ok")
+        return r.json()
 
 
 class Location:
@@ -199,7 +198,7 @@ class Report:
 
 
 def encode_string(s: str):
-    return bytes([len(s)]) + s.encode()
+    return len(s).to_bytes(4, 'little') + s.encode()
 
 
 def encode_float(f: float):
