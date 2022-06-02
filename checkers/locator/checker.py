@@ -11,6 +11,7 @@ import sys
 import struct
 import traceback
 from typing import Optional
+from simplejson.errors import JSONDecodeError
 
 from fakesession import FakeSession
 
@@ -168,7 +169,10 @@ class Report:
     def check_in(self, api: LocatorApi, name: str, token: str):
         _log(f"Report is {self}")
         for entry in api.get_private(name, token):
-            location = self.decode_location(entry["location"])
+            try:
+                location = self.decode_location(entry["location"])
+            except Exception as e:
+                location = Location(0, 0)
             if (self.timestamp is None or entry["timestamp"] == self.timestamp) \
                     and math.isclose(self.location.lat, location.lat, abs_tol=0.1) \
                     and math.isclose(self.location.lon, location.lon, abs_tol=0.1) \
@@ -286,7 +290,7 @@ def _main():
         die(ExitStatus.OK, "OK")
     except CorruptError as e:
         die(ExitStatus.CORRUPT, traceback.format_exc())
-    except MumbleError as e:
+    except (MumbleError, JSONDecodeError) as e:
         die(ExitStatus.MUMBLE, traceback.format_exc())
     except (DownError, IOError) as e:
         die(ExitStatus.DOWN, traceback.format_exc())

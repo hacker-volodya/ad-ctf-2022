@@ -27,7 +27,7 @@ DEBUG = os.getenv("DEBUG", True)
 
 
 def info():
-    print('vulns: 2:1:2\npublic_flag_description: droplet storage\n', flush=True, end="")
+    print('vulns: 1:3')
     exit(101)
 
 
@@ -43,7 +43,7 @@ def put(host: str, flag_id: str, flag: str, vuln: str):
     random.seed(int.from_bytes(flag_id.encode(), 'big'))
     name = rand_string()
     key = rand_string()
-    vuln = random.choice(["2", "1", "2"])
+    #vuln = random.choice(["2", "1", "2"])
     droplet = Flagstore(vuln + "_" + name, api, vuln)
     droplet.deploy()
     droplet.put(key, flag)
@@ -54,7 +54,7 @@ def get(host: str, flag_id: str, flag: str, vuln: str):
     random.seed(int.from_bytes(flag_id.encode(), 'big'))
     name = rand_string()
     key = rand_string()
-    vuln = random.choice(["2", "1", "2"])
+    #vuln = random.choice(["2", "1", "2"])
     if vuln + "_" + name not in api.list():
         raise CorruptError("No such droplet")
     droplet = Flagstore(vuln + "_" + name, api, vuln)
@@ -273,6 +273,8 @@ def die(code: ExitStatus, msg: str):
 
 def _main():
     try:
+        if argv[1] == "info":
+            info()
         if len(argv) < 3:
             raise WrongArgumentsError()
         cmd = argv[1]
@@ -289,8 +291,6 @@ def _main():
             put(hostname, fid, flag, vuln)
         elif cmd == "check":
             check(hostname)
-        elif cmd == "info":
-            info()
         else:
             raise WrongArgumentsError()
         die(ExitStatus.OK, "OK")
